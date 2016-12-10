@@ -315,8 +315,14 @@ class IPLinkRequest(IPRequest):
             linkinfo.append(['IFLA_INFO_KIND', value])
             if value in ('vlan', 'bond', 'tuntap', 'veth',
                          'vxlan', 'macvlan', 'macvtap', 'gre',
-                         'gretap', 'ipvlan', 'bridge', 'vrf'):
+                         'gretap', 'ipvlan', 'bridge', 'vrf',
+                         'ip6gre', 'ip6gretap'):
                 linkinfo.append(['IFLA_INFO_DATA', {'attrs': []}])
+            # provide implicit address family values for GRE
+            if value in ("gre", "gretap"):
+                self["family"] = AF_INET
+            elif value in ("ip6gre", "ip6gretap"):
+                self["family"] = AF_INET6
         elif key == 'vlan_id':
             nla = ['IFLA_VLAN_ID', value]
             # FIXME: we need to replace, not add
@@ -359,8 +365,8 @@ class IPLinkRequest(IPRequest):
         elif key.startswith('gre_'):
             nla = [ifinfmsg.name2nla(key), value]
             self.defer_nla(nla, ('IFLA_LINKINFO', 'IFLA_INFO_DATA'),
-                           lambda x: x.get('kind', None) == 'gre' or
-                           x.get('kind', None) == 'gretap')
+                           lambda x: x.get('kind', None) in (
+                               'gre', 'gretap', 'ip6gre', 'ip6gretap'))
         elif key.startswith('vxlan_'):
             nla = [ifinfmsg.name2nla(key), value]
             self.defer_nla(nla, ('IFLA_LINKINFO', 'IFLA_INFO_DATA'),

@@ -2105,6 +2105,66 @@ class TestExplicit(BasicSetup):
             ip2.release()
 
     @skip_if_not_supported
+    def test_create_ip6gre(self):
+        require_user('root')
+
+        ifL = self.get_ifname()
+        ifV = self.get_ifname()
+        with self.ip.create(kind='dummy', ifname=ifL) as i:
+            i.add_ip('2001:dba::1/64')
+            i.up()
+
+        self.ip.create(kind='ip6gre',
+                       ifname=ifV,
+                       gre_local='2001:dba::1',
+                       gre_remote='2001:dba::2',
+                       gre_ttl=16).commit()
+
+        ip2 = IPDB()
+        ifdb = ip2.interfaces
+        try:
+            assert ifdb[ifV].gre_local == '2001:dba::1'
+            assert ifdb[ifV].gre_remote == '2001:dba::2'
+            assert ifdb[ifV].gre_ttl == 16
+        except Exception:
+            raise
+        finally:
+            ip2.release()
+
+    @skip_if_not_supported
+    def test_create_ip6gretap(self):
+        require_user('root')
+
+        ifL = self.get_ifname()
+        ifV = self.get_ifname()
+        with self.ip.create(kind='dummy', ifname=ifL) as i:
+            i.add_ip('2001:dba::1/64')
+            i.up()
+
+        self.ip.create(kind='ip6gretap',
+                       ifname=ifV,
+                       gre_local='2001:dba::1',
+                       gre_ikey=1,
+                       gre_okey=2,
+                       gre_iflags=0x0020,
+                       gre_oflags=0x0020,
+                       gre_ttl=16).commit()
+
+        ip2 = IPDB()
+        ifdb = ip2.interfaces
+        try:
+            assert ifdb[ifV].gre_local == '2001:dba::1'
+            assert ifdb[ifV].gre_ikey == 1
+            assert ifdb[ifV].gre_okey == 2
+            assert ifdb[ifV].gre_iflags == 0x0020
+            assert ifdb[ifV].gre_oflags == 0x0020
+            assert ifdb[ifV].gre_ttl == 16
+        except Exception:
+            raise
+        finally:
+            ip2.release()
+
+    @skip_if_not_supported
     def test_create_vxlan(self):
         require_user('root')
 

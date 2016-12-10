@@ -1558,7 +1558,7 @@ class nlmsg_atoms(nlmsg_base):
                         record.get('ttl', 0)
                     self['value'] += struct.pack('>I', label)
             else:
-                raise TypeError('socket family not supported')
+                raise TypeError('socket family not supported %s')
             nla_base.encode(self)
 
         def decode(self):

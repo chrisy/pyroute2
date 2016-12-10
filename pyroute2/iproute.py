@@ -1050,6 +1050,9 @@ class IPRouteMixin(object):
                     gre_iflags=32,
                     gre_oflags=32)
 
+        Support for GRE over IPv6 is also included; use `kind=ip6gre`
+        and the same fields as for GRE over IPv4.
+
         ► macvlan
 
         Macvlan interfaces act like VLANs within OS. The macvlan driver
@@ -1239,6 +1242,10 @@ class IPRouteMixin(object):
 
         # apply filter
         kwarg = lrq(kwarg)
+
+        # check if filter provides implicit family
+        if 'family' in kwarg and msg['family'] == 0:
+            msg['family'] = kwarg.pop('family')
 
         # attach NLA
         for key in kwarg:
